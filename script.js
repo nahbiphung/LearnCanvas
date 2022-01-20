@@ -20,39 +20,43 @@ canvas.addEventListener('click', (event) => {
     mouse.x = event.x;
     mouse.y = event.y;
 
-    for (let i = 0; i < 2; i++) {
-        particles.push(new Particle);
+    const particleCount = 100;
+    const angleIncrement = (Math.PI * 2) / particleCount;
+
+    for (let i = 0; i < particleCount; i++) {
+        hue = Math.random() * 360;
+        particles.push(new Particle({
+            x: Math.cos(angleIncrement * i) * Math.random(),
+            y: Math.sin(angleIncrement * i) * Math.random(),
+        }));
     }
 })
 
-canvas.addEventListener('mousemove', (event) => {
-    mouse.x = event.x;
-    mouse.y = event.y;
-    for (let i = 0; i < 2; i++) {
-        particles.push(new Particle);
-    }
-})
 
+const gravity = 0.005;
+const friction = 0.99;
 
 class Particle {
-    constructor() {
+    constructor(velocity) {
         this.x = mouse.x;
         this.y = mouse.y;
-        this.size = Math.random() * 15 + 1;
-        this.speedX = Math.random() * 3 - 1.5;
-        this.speedY = Math.random() * 3 - 1.5;
-        this.color = 'hsl(' + hue + ', 100%, 50%)';
+        this.size = 1;
+        this.color = 'hsl(' + hue + ', 100%, 50%)'; 
+        this.speedX = velocity.x;
+        this.speedY = velocity.y;
     }
     update() {
+        // this.speedX *= friction;
+        this.speedY += gravity;
         this.x += this.speedX;
         this.y += this.speedY;
-        if(this.size > 0.2) this.size -= 0.1
     }
     draw() {
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
+        ctx.closePath();
     }
 }
 
@@ -60,31 +64,13 @@ function handleParticle() {
     for (let i = 0; i < particles.length; i++) {
         particles[i].update();
         particles[i].draw();
-        for (let j = 0; j < particles.length; j++) {
-            const dx =  particles[i].x - particles[j].x;
-            const dy =  particles[i].y - particles[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if(distance < 100) {
-                ctx.beginPath();
-                ctx.strokeStyle = particles[i].color;
-                ctx.lineWidth = 0.2;
-                ctx.moveTo(particles[i].x, particles[i].y);
-                ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.stroke();
-            }
-        }
-
-        if (particles[i].size <= 0.3) {
-            particles.splice(i, 1);
-            i--;
-        }
     }
 }
 
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.fillStyle = 'rgba(0,0,0,0.03)';
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0,0,0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     handleParticle();
     hue++;
     requestAnimationFrame(animate);
